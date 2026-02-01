@@ -23,7 +23,7 @@
 
 - [x] **CLI UX Upgrade**: Add colors, banners, and better status messages to `TestGen.ps1`.
 - [x] **Final Verification**: Run the stylized tool to ensure no regressions.
-- [x] Documentation (`README.txt` or usage instructions).
+- [x] Documentation (`README.md` with Diagram created).
 
 ## Phase 5: Backend Development (FastAPI)
 
