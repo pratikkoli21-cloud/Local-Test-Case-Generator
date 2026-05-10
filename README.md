@@ -1,107 +1,64 @@
-# Local LLM Test Case Generator
+# Test Cases Generator
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-stable-green.svg)
+A professional test case generation tool for BFSI/Fintech requirements, built with React and TypeScript.
 
-A **Privacy-First** AI tool that generates comprehensive unit tests for your code using a local LLM (`llama3.2`) via Ollama. No data leaves your machine.
+## Features
 
----
+- 📝 **Requirement Input** - Enter detailed requirement descriptions
+- 🧪 **Comprehensive Coverage** - Generates test cases across all four quadrants:
+  - Positive scenarios
+  - Negative scenarios  
+  - Boundary/Edge cases
+  - Integration scenarios
+- 🎯 **Domain Expertise** - Specialized for BFSI/Fintech domains (payments, KYC, authentication, etc.)
+- 📊 **Industry Standards** - Follows ISTQB principles and professional QC practices
+- 💾 **Local Generation** - No server required, works offline
 
-## 🏗️ Architecture
-
-The system follows a strict **3-Layer Architecture** (Frontend, Backend, and AI) to ensure deterministic results from probabilistic models.
-
-```mermaid
-graph TD
-    User([👤 Developer])
-    
-    subgraph "Frontend Layer (Web UI)"
-        UI[💻 Single Page App]
-        Highlight[Syntax Highlighter]
-    end
-    
-    subgraph "Navigation Layer (Backend)"
-        API[🚀 FastAPI Server]
-        PromptEng[⚙️ Prompt Strategy]
-        Cleaner[🧹 Code Sanitizer]
-    end
-    
-    subgraph "Tool Layer (Local AI)"
-        Ollama[🦙 Ollama API]
-        Model[(llama3.2)]
-    end
-
-    User -->|Pastes Code| UI
-    UI -->|POST /generate| API
-    API -->|Construct Prompt| PromptEng
-    PromptEng -->|Raw Request| Ollama
-    Ollama -->|Inference| Model
-    Model -->|Generated Token Stream| Ollama
-    Ollama -->|Raw Response| Cleaner
-    Cleaner -->|Clean Python Code| API
-    API -->|JSON Response| UI
-    UI -->|Render & Highlight| Highlight
-    Highlight -->|Visual Output| User
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-1. **Ollama**: Installed and running (`ollama serve`).
-2. **Model**: Pull the model: `ollama pull llama3.2`.
-3. **Python 3.10+**: with `pip`.
+## Getting Started
 
 ### Installation
 
-1. **Clone the repository**:
-
-    ```bash
-    git clone https://github.com/pratikkoli21-cloud/AITesterBluePrintProjects.git
-    cd "Project 1 - LocalTestCaseGenerator"
-    ```
-
-2. **Install Backend Dependencies**:
-
-    ```bash
-    pip install -r backend/requirements.txt
-    ```
-
-### Usage
-
-#### Option A: Web Interface (Recommended)
-
-1. **Start the Backend**:
-
-    ```bash
-    python -m backend.main
-    ```
-
-2. **Open the Frontend**:
-    Double-click `frontend/index.html` to open it in your browser.
-
-#### Option B: CLI Tool
-
-Run the PowerShell script directly on any file:
-
-```powershell
-.\TestGen.ps1 -File .\calculator.py
+```bash
+npm install
 ```
 
----
+### Development
 
-## 📂 Project Structure
+Start the development server on `http://localhost:8080`:
 
-- `backend/`: FastAPI server and Prompt Engineering logic.
-- `frontend/`: Premium Dark-Mode UI (Single File).
-- `tools/`: Utility scripts for deployment and verification.
-- `architecture/`: Technical SOPs and System Design documents.
-- `TestGen.ps1`: Standalone CLI wrapper.
+```bash
+npm run dev
+```
 
----
+### Build
 
-## 🛡️ License
+Build for production:
 
-This project is licensed under the MIT License.
+```bash
+npm run build
+```
+
+## Usage
+
+1. Enter your requirement description in the text area
+2. Click "Generate Test Cases"
+3. Review the generated test cases organized by category
+4. Copy and adapt the test cases for your test management tool
+
+## Test Case Categories
+
+- **Positive**: Happy path and successful scenarios
+- **Negative**: Error conditions and invalid inputs
+- **Boundary**: Edge cases, limits, and constraints
+- **Integration**: System interactions and external dependencies
+
+## Tech Stack
+
+- React 18
+- TypeScript
+- Vite
+- CSS3
+
+## License
+
+MIT
