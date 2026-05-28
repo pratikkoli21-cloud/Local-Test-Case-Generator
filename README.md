@@ -1,64 +1,57 @@
-# Test Cases Generator
+# ✨ AI Test Case Generator
 
-A professional test case generation tool for BFSI/Fintech requirements, built with React and TypeScript.
+An AI-powered QA tool that automatically generates exhaustive, detailed test cases from Business Requirement Documents (BRDs), Jira stories, or pasted requirements. It dynamically queries Google's Gemini API to analyze requirements and exports the results into beautifully formatted Excel (`.xlsx`) files.
 
-## Features
+## 🚀 Features
 
-- 📝 **Requirement Input** - Enter detailed requirement descriptions
-- 🧪 **Comprehensive Coverage** - Generates test cases across all four quadrants:
-  - Positive scenarios
-  - Negative scenarios  
-  - Boundary/Edge cases
-  - Integration scenarios
-- 🎯 **Domain Expertise** - Specialized for BFSI/Fintech domains (payments, KYC, authentication, etc.)
-- 📊 **Industry Standards** - Follows ISTQB principles and professional QC practices
-- 💾 **Local Generation** - No server required, works offline
+- **Smart AI Analysis:** Powered by Google's Gemini API to guarantee high test coverage. Includes an intelligent fallback mechanism if specific models are under high demand.
+- **Multiple Focus Areas:** Generate test cases specifically for Functional, Negative, Boundary, Integration, UI/UX, Performance, or Security testing.
+- **Rich Excel Export:** Downloads perfectly formatted Excel files with text-wrapping, custom-colored headers, and auto-adjusting column widths natively using `exceljs`.
+- **File Upload:** Drag and drop or upload your requirement documents.
+- **Token Auto-Rescue:** Gracefully handles and rescues valid test cases even if the AI hits its maximum token limits on massive BRDs.
 
-## Getting Started
+## 🛠️ Prerequisites
 
-### Installation
+- Node.js (v18 or higher)
+- Python (3.8 or higher)
+- A free Google Gemini API Key
+
+## 💻 Local Setup Instructions
+
+To run this application locally, you will need to start both the Python backend and the React frontend simultaneously in two separate terminal windows.
+
+### 1. Start the Python Backend
+
+Open your first terminal window, navigate to the project directory, and run:
 
 ```bash
-npm install
+# Install the required Python packages
+pip install fastapi uvicorn httpx pydantic
+
+# Set your Gemini API key
+# For Windows Command Prompt:
+set GEMINI_API_KEY=your_api_key_here
+
+# For Windows PowerShell:
+$env:GEMINI_API_KEY="your_api_key_here"
+
+# For Mac/Linux:
+export GEMINI_API_KEY="your_api_key_here"
+
+# Start the FastAPI backend
+python backend.py
 ```
 
-### Development
+### 2. Start the React Frontend
 
-Start the development server on `http://localhost:8080`:
+Open a **second, entirely separate terminal window**, navigate to the project directory, and run:
 
 ```bash
+# Install Node dependencies
+npm install
+
+# Start the Vite development server
 npm run dev
 ```
 
-### Build
-
-Build for production:
-
-```bash
-npm run build
-```
-
-## Usage
-
-1. Enter your requirement description in the text area
-2. Click "Generate Test Cases"
-3. Review the generated test cases organized by category
-4. Copy and adapt the test cases for your test management tool
-
-## Test Case Categories
-
-- **Positive**: Happy path and successful scenarios
-- **Negative**: Error conditions and invalid inputs
-- **Boundary**: Edge cases, limits, and constraints
-- **Integration**: System interactions and external dependencies
-
-## Tech Stack
-
-- React 18
-- TypeScript
-- Vite
-- CSS3
-
-## License
-
-MIT
+Open your browser to the URL provided in the terminal (usually `http://localhost:8080`) and start generating test cases!
