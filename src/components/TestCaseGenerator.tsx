@@ -1,5 +1,5 @@
 ﻿import { useState, type ChangeEvent, type DragEvent } from 'react'
-import * as ExcelJS from 'exceljs'
+import ExcelJS from 'exceljs'
 
 interface TestCase {
   srNo: number
@@ -54,7 +54,7 @@ export default function TestCaseGenerator() {
   const [isGenerating, setIsGenerating] = useState(false)
 
   const setFocus = (key: FocusKey, value: boolean) => {
-    setFocusAreas(prev => ({ ...prev, [key]: value }))
+    setFocusAreas((prev: Record<FocusKey, boolean>) => ({ ...prev, [key]: value }))
   }
 
   const readFile = async (file: File) => {
@@ -120,7 +120,7 @@ Requirement:
 ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
 
       // Point to your new local backend server
-      const response = await fetch('http://127.0.0.1:8000/generate', {
+      const response = await fetch('http://127.0.0.1:8002/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -139,12 +139,15 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
       const responseText = data.responseText || '';
       
       // Clean up markdown ticks if the model disobeys (even with JSON mime type)
-      const cleanJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      let cleanJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
       
-      let parsed: any = {};
+      // Remove invalid control characters from the JSON string
+      cleanJson = cleanJson.replace(/[\x00-\x1F\x7F]/g, ' ').trim();
+      
+      let parsed: Record<string, any> = {};
       try {
         parsed = JSON.parse(cleanJson || '{}');
-      } catch (parseError: any) {
+      } catch (parseError) {
         console.warn("JSON parsing failed, likely due to AI hitting max token limits. Attempting to rescue valid test cases...");
         
         // Find the last completely closed object in the string to discard the cut-off text
@@ -153,10 +156,10 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
           const rescuedStr = cleanJson.substring(0, lastValidBrace + 1);
           try {
             parsed = JSON.parse(rescuedStr + ']}'); // Rescue standard object structure
-          } catch (e1) {
+          } catch {
             try {
               parsed = JSON.parse(rescuedStr + ']'); // Rescue raw array structure
-            } catch (e2) {
+            } catch {
               throw parseError; // Throw original if all rescue attempts fail
             }
           }
@@ -174,14 +177,14 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
       setTestCases(generated)
       setStatusType('success')
       setUploadMessage(`Generated ${generated.length} test cases successfully.`)
-    } catch (error: any) {
+    } catch (error) {
       console.error("Test generation crashed:", error)
       setStatusType('error');
-      let errorMessage = error.message;
-      if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Failed to communicate with the AI backend. Please make sure your local server is running on http://127.0.0.1:8000.';
-      } else if (error.message.includes('JSON') || error.message.includes('empty test case')) {
-        errorMessage = `Data Parsing Error: ${error.message}`;
+      let errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      if (errorMessage.includes('Failed to fetch')) {
+        errorMessage = 'Failed to communicate with the AI backend. Please make sure your local server is running on http://127.0.0.1:8002.';
+      } else if (errorMessage.includes('JSON') || errorMessage.includes('empty test case')) {
+        errorMessage = `Data Parsing Error: ${errorMessage}`;
       }
       setUploadMessage(errorMessage);
     } finally {
@@ -201,7 +204,7 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
     const headerRow = worksheet.addRow(headers);
     
     // Apply Header Styling
-    headerRow.eachCell((cell) => {
+    headerRow.eachCell((cell: ExcelJS.Cell) => {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -216,7 +219,7 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
     });
 
     // Add Rows
-    testCases.forEach((tc) => {
+    testCases.forEach((tc: TestCase) => {
       const row = worksheet.addRow([
         tc.srNo,
         tc.reqId,
@@ -228,7 +231,7 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
         tc.testCaseType,
         tc.module,
         tc.subModule,
-        (tc.testSteps || []).map((step, i) => `${i + 1}. ${step}`).join('\n'),
+        (tc.testSteps || []).map((step: string, i: number) => `${i + 1}. ${step}`).join('\n'),
         tc.expectedResult,
         tc.actualResult,
         tc.status,
@@ -238,7 +241,7 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
       ]);
 
       // Apply Row Styling (Borders & Wrap Text)
-      row.eachCell((cell) => {
+      row.eachCell((cell: ExcelJS.Cell) => {
         cell.border = {
           top: { style: 'thin' }, left: { style: 'thin' },
           bottom: { style: 'thin' }, right: { style: 'thin' }
@@ -248,17 +251,19 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
     });
 
     // Auto-adjust column widths based on text length (capped at 60 characters so wrap-text functions beautifully)
-    worksheet.columns.forEach((column) => {
+    worksheet.columns.forEach((column: Partial<ExcelJS.Column>) => {
       let maxLength = 0;
-      column.eachCell({ includeEmpty: true }, (cell) => {
+      column.eachCell?.({ includeEmpty: true }, (cell: ExcelJS.Cell) => {
         const cellValue = cell.value ? cell.value.toString() : '';
         const lines = cellValue.split('\n');
-        const maxLineLength = Math.max(...lines.map(line => line.length));
+        const maxLineLength = Math.max(...lines.map((line: string) => line.length));
         if (maxLineLength > maxLength) {
           maxLength = maxLineLength;
         }
       });
-      column.width = Math.min(Math.max(maxLength + 2, 12), 60);
+      if (column) {
+        column.width = Math.min(Math.max(maxLength + 2, 12), 60);
+      }
     });
 
     // Export the file natively to browser
@@ -410,7 +415,7 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
             </button>
           </div>
           <div className="test-cases" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {testCases.map(tc => (
+            {testCases.map((tc) => (
               <div key={tc.testCaseId} className="test-case" style={{
                 backgroundColor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: '12px', 
                 padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', fontFamily: '"Segoe UI", system-ui, sans-serif'
@@ -463,8 +468,8 @@ ${requirement.trim() || `Uploaded file: ${uploadName}`}`;
                        <span style={{fontSize:'1.1em'}}>🔄</span> Test Steps
                     </strong>
                     <ol style={{ margin: '12px 0 0 0', paddingLeft: '24px', color: '#424242', fontSize: '0.95em', lineHeight: '1.6' }}>
-                      {tc.testSteps.map((step, idx) => (
-                        <li key={idx}>{step}</li>
+                  {(tc.testSteps || []).map((step, idx) => (
+                        <li key={`step-${idx}`}>{step}</li>
                       ))}
                     </ol>
                   </div>
